@@ -1,0 +1,3758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Starzone Updator v3.1 - Web Version</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <style>
+        :root {
+            --color-reset: #000000;
+            --color-info: #00a8ff;
+            --color-ok: #00b894;
+            --color-warn: #fdcb6e;
+            --color-err: #d63031;
+            --color-patch: #6c5ce7;
+            --color-arrow: #e17055;
+            --bg-dark: #1e272e;
+            --bg-card: #2d3436;
+            --text-light: #dfe6e9;
+            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-success: linear-gradient(135deg, #00b894 0%, #00a8ff 100%);
+            --gradient-warning: linear-gradient(135deg, #fdcb6e 0%, #e17055 100%);
+            --gradient-danger: linear-gradient(135deg, #d63031 0%, #e17055 100%);
+            --gradient-purple: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1e272e 0%, #2d3436 100%);
+            color: var(--text-light);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        /* Enhanced Header */
+        .main-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .main-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-primary);
+        }
+        
+        h1 {
+            color: var(--text-light);
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .version-badge {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-size: 0.9em;
+            font-weight: bold;
+            margin-left: 15px;
+            display: inline-block;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        /* Enhanced Login Card */
+        .login-card {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .login-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-primary);
+        }
+        
+        .login-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .login-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            display: block;
+        }
+        
+        .login-title {
+            color: var(--text-light);
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .login-subtitle {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1rem;
+        }
+        
+        /* Enhanced Form Elements */
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--color-info);
+            font-size: 0.95rem;
+        }
+        
+        .input-group {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        
+        .input-icon {
+            position: absolute;
+            left: 15px;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 1.1rem;
+            z-index: 2;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 15px 15px 15px 50px;
+            border-radius: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.3);
+            color: var(--text-light);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: var(--color-info);
+            background: rgba(0, 0, 0, 0.4);
+            box-shadow: 0 0 0 3px rgba(0, 168, 255, 0.1);
+        }
+        
+        .form-input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+        
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.6);
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: color 0.3s ease;
+            z-index: 2;
+        }
+        
+        .password-toggle:hover {
+            color: var(--color-info);
+        }
+        
+        /* Enhanced Button Styles */
+        .btn {
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            position: relative;
+            overflow: hidden;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 50px;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn:hover::before {
+            left: 100%;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+        }
+        
+        .btn:active {
+            transform: translateY(-1px);
+        }
+        
+        .btn:disabled {
+            background: #636e72;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .btn:disabled::before {
+            display: none;
+        }
+        
+        /* Enhanced Conversion Mode Buttons */
+        .conversion-btn {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-light);
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            padding: 16px 24px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            min-height: 60px;
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .conversion-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.6s;
+        }
+        
+        .conversion-btn:hover::before {
+            left: 100%;
+        }
+        
+        .conversion-btn:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(253, 203, 110, 0.2);
+        }
+        
+        .conversion-btn.active {
+            background: var(--gradient-warning);
+            color: #2d3436;
+            border-color: transparent;
+            box-shadow: 0 8px 25px rgba(253, 203, 110, 0.4);
+            transform: translateY(-2px);
+        }
+        
+        .conversion-btn.active::before {
+            display: none;
+        }
+        
+        .conversion-btn .btn-icon {
+            font-size: 1.2rem;
+            transition: transform 0.3s ease;
+        }
+        
+        .conversion-btn:hover .btn-icon {
+            transform: scale(1.1);
+        }
+        
+        .conversion-btn.active .btn-icon {
+            transform: scale(1.2);
+        }
+        
+        /* Enhanced Download Button */
+        .download-btn {
+            background: var(--gradient-success);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(0, 184, 148, 0.4);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            min-height: 60px;
+            position: relative;
+            overflow: hidden;
+            flex: 1;
+        }
+        
+        .download-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.6s;
+        }
+        
+        .download-btn:hover::before {
+            left: 100%;
+        }
+        
+        .download-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 184, 148, 0.6);
+        }
+        
+        .download-btn:active {
+            transform: translateY(-1px);
+        }
+        
+        .download-btn .btn-icon {
+            font-size: 1.3rem;
+            transition: transform 0.3s ease;
+        }
+        
+        .download-btn:hover .btn-icon {
+            transform: translateY(2px);
+        }
+        
+        /* Enhanced Reset Button */
+        .reset-btn {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-light);
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            padding: 16px 32px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            min-height: 60px;
+            backdrop-filter: blur(10px);
+            flex: 1;
+        }
+        
+        .reset-btn:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Button Groups */
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+        
+        .conversion-group {
+            display: flex;
+            gap: 12px;
+            margin: 15px 0;
+        }
+        
+        /* Enhanced Login Button */
+        .login-btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            background: var(--gradient-primary);
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            position: relative;
+            overflow: hidden;
+            min-height: 55px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .login-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .login-btn:hover::before {
+            left: 100%;
+        }
+        
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+        
+        .login-btn:active {
+            transform: translateY(0);
+        }
+        
+        .login-btn:disabled {
+            background: #636e72;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .login-btn:disabled::before {
+            display: none;
+        }
+        
+        .login-btn-loading {
+            position: relative;
+            color: transparent;
+        }
+        
+        .login-btn-loading::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            top: 50%;
+            left: 50%;
+            margin: -10px 0 0 -10px;
+            border: 2px solid transparent;
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Enhanced Status */
+        .auth-status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 12px;
+            box-shadow: 0 0 10px currentColor;
+        }
+        
+        .status-active {
+            background-color: var(--color-ok);
+            animation: pulse 2s infinite;
+        }
+        
+        .status-inactive {
+            background-color: var(--color-err);
+        }
+        
+        .status-processing {
+            background-color: var(--color-warn);
+            animation: pulse 1.5s infinite;
+        }
+        
+        /* Enhanced Features Grid */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .feature-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            display: block;
+        }
+        
+        .feature-title {
+            color: var(--text-light);
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .feature-desc {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        
+        /* Enhanced Remember Me */
+        .remember-group {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 20px 0;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .checkbox {
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+            background: rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .checkbox.checked {
+            background: var(--color-info);
+            border-color: var(--color-info);
+        }
+        
+        .checkbox.checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .checkbox-label {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+        
+        .forgot-link {
+            color: var(--color-info);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s ease;
+        }
+        
+        .forgot-link:hover {
+            color: var(--color-patch);
+            text-decoration: underline;
+        }
+        
+        /* Enhanced Footer */
+        .login-footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+        }
+        
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 10px;
+        }
+        
+        .footer-link {
+            color: rgba(255, 255, 255, 0.6);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .footer-link:hover {
+            color: var(--color-info);
+        }
+        
+        /* Enhanced Main Content */
+        .card {
+            background-color: var(--bg-card);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .card-title {
+            color: var(--color-info);
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .card-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .toggle-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-light);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s;
+        }
+        
+        .toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .toggle-btn.active {
+            background: var(--color-info);
+            color: white;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .main-header {
+                padding: 20px 15px;
+                margin-bottom: 20px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .login-card {
+                padding: 30px 20px;
+                margin-bottom: 20px;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .remember-group {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+            
+            .footer-links {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            /* Mobile-specific improvements */
+            .conversion-group {
+                flex-direction: column;
+            }
+            
+            .conversion-btn, .download-btn, .reset-btn {
+                min-height: 55px;
+                padding: 14px 20px;
+            }
+            
+            .btn-group {
+                flex-direction: column;
+            }
+            
+            .info-grid {
+                grid-template-columns: 1fr !important;
+                gap: 8px !important;
+            }
+            
+            .info-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 4px;
+                padding: 8px 0;
+            }
+            
+            .info-label {
+                font-size: 0.8rem;
+            }
+            
+            .info-value {
+                font-size: 0.9rem;
+                word-break: break-all;
+            }
+            
+            .card-title {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .card-actions {
+                align-self: stretch;
+                justify-content: center;
+            }
+            
+            .step-indicator {
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+            
+            .step {
+                flex: 1 0 45%;
+                min-width: 120px;
+            }
+            
+            .step-text {
+                font-size: 0.7rem;
+            }
+            
+            .processing-stats {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+            
+            .stat-item {
+                padding: 12px;
+            }
+            
+            .stat-value {
+                font-size: 1.2em;
+            }
+            
+            .stat-label {
+                font-size: 0.7rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .main-header {
+                padding: 15px 10px;
+            }
+            
+            h1 {
+                font-size: 1.7rem;
+            }
+            
+            .version-badge {
+                margin-left: 8px;
+                padding: 6px 12px;
+                font-size: 0.8em;
+            }
+            
+            .login-card {
+                padding: 20px 15px;
+            }
+            
+            .login-title {
+                font-size: 1.5rem;
+            }
+            
+            .form-input {
+                padding: 12px 12px 12px 45px;
+                font-size: 0.9rem;
+            }
+            
+            .input-icon {
+                left: 12px;
+                font-size: 1rem;
+            }
+            
+            .step {
+                flex: 1 0 100%;
+            }
+            
+            .processing-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Animation for login success */
+        @keyframes successPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .login-success {
+            animation: successPulse 0.5s ease;
+        }
+        
+        /* Enhanced Log Container */
+        .log-container {
+            background-color: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .log-info {
+            color: var(--color-info);
+        }
+        
+        .log-ok {
+            color: var(--color-ok);
+        }
+        
+        .log-warn {
+            color: var(--color-warn);
+        }
+        
+        .log-err {
+            color: var(--color-err);
+        }
+        
+        .log-patch {
+            color: var(--color-patch);
+        }
+        
+        .log-arrow {
+            color: var(--color-arrow);
+        }
+        
+        /* Enhanced Progress Elements */
+        .progress-container {
+            margin: 20px 0;
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background-color: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient-primary);
+            width: 0%;
+            transition: width 0.5s ease-in-out;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        
+        .progress-text {
+            text-align: center;
+            margin-top: 8px;
+            font-size: 0.9rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .progress-details {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+        
+        /* Enhanced Processing Stats */
+        .processing-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .stat-item {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            transition: all 0.5s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: var(--color-info);
+            transition: all 0.5s ease;
+        }
+        
+        .stat-label {
+            font-size: 0.8em;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+        
+        /* Enhanced Step Indicator */
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin: 25px 0;
+            position: relative;
+        }
+        
+        .step-indicator::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: rgba(255,255,255,0.2);
+            z-index: 1;
+        }
+        
+        .step {
+            text-align: center;
+            position: relative;
+            z-index: 2;
+            flex: 1;
+        }
+        
+        .step-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 8px;
+            transition: all 0.5s ease;
+            border: 2px solid rgba(255,255,255,0.2);
+            font-weight: bold;
+        }
+        
+        .step.active .step-circle {
+            background: var(--color-info);
+            border-color: var(--color-info);
+            box-shadow: 0 0 20px rgba(0, 168, 255, 0.5);
+        }
+        
+        .step.completed .step-circle {
+            background: var(--color-ok);
+            border-color: var(--color-ok);
+        }
+        
+        .step-text {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.8);
+        }
+        
+        /* Enhanced Current Processing */
+        .current-processing {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-family: monospace;
+            transition: all 0.3s ease;
+            border-left: 4px solid var(--color-info);
+        }
+        
+        .processing-line {
+            color: var(--color-warn);
+            font-weight: 600;
+        }
+        
+        /* Enhanced Info Panels */
+        .device-info-panel {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border-left: 4px solid var(--color-info);
+        }
+        
+        .account-info-panel {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border-left: 4px solid var(--color-ok);
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .info-label {
+            font-weight: 500;
+            color: var(--color-info);
+        }
+        
+        .info-value {
+            font-weight: 600;
+        }
+        
+        .copy-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: var(--text-light);
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin-left: 10px;
+            transition: all 0.3s;
+        }
+        
+        .copy-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Enhanced Expiration Styles */
+        .expiration-warning {
+            color: var(--color-warn);
+            font-weight: 600;
+        }
+        
+        .expiration-critical {
+            color: var(--color-err);
+            font-weight: 600;
+            animation: pulse 2s infinite;
+        }
+        
+        /* Enhanced File Upload */
+        .file-upload-area {
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: rgba(0, 0, 0, 0.2);
+        }
+        
+        .file-upload-area:hover {
+            border-color: var(--color-info);
+            background-color: rgba(0, 168, 255, 0.1);
+        }
+        
+        .file-upload-area.drag-over {
+            border-color: var(--color-ok);
+            background-color: rgba(0, 184, 148, 0.1);
+        }
+        
+        .file-info {
+            margin-top: 8px;
+            font-size: 0.9rem;
+            color: var(--color-warn);
+        }
+        
+        /* Enhanced Modal Styles */
+        .maintenance-modal, .expiration-modal, .update-modal, .forgot-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        
+        .maintenance-modal-content, .expiration-modal-content, .update-modal-content, .forgot-modal-content {
+            background: var(--bg-card);
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(0, 168, 255, 0.5);
+        }
+        
+        .maintenance-modal-content {
+            border: 2px solid var(--color-warn);
+            box-shadow: 0 0 30px rgba(247, 37, 133, 0.5);
+        }
+        
+        .expiration-modal-content {
+            border: 2px solid var(--color-err);
+            box-shadow: 0 0 30px rgba(230, 57, 70, 0.5);
+        }
+        
+        .update-modal-content {
+            border: 2px solid var(--color-info);
+        }
+        
+        .forgot-modal-content {
+            border: 2px solid var(--color-info);
+        }
+        
+        .maintenance-icon, .expiration-icon, .update-icon, .forgot-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+        
+        .maintenance-title, .expiration-title, .update-title, .forgot-title {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        
+        .maintenance-title {
+            color: var(--color-warn);
+        }
+        
+        .expiration-title {
+            color: var(--color-err);
+        }
+        
+        .update-title {
+            color: var(--color-info);
+        }
+        
+        .forgot-title {
+            color: var(--color-info);
+        }
+        
+        .maintenance-message, .expiration-message, .update-message, .forgot-message {
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+        
+        .maintenance-time, .expiration-date, .update-version {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-family: monospace;
+            font-size: 1.1rem;
+        }
+        
+        .maintenance-time {
+            border: 1px solid var(--color-warn);
+        }
+        
+        .expiration-date {
+            border: 1px solid var(--color-err);
+        }
+        
+        .update-version {
+            border: 1px solid var(--color-info);
+        }
+        
+        .update-notes {
+            text-align: left;
+            margin: 20px 0;
+            max-height: 200px;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .update-item {
+            padding: 8px;
+            margin: 5px 0;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 6px;
+            border-left: 3px solid var(--color-info);
+        }
+        
+        .update-type-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        
+        .type-feature {
+            background: var(--color-ok);
+            color: white;
+        }
+        
+        .type-bugfix {
+            background: var(--color-warn);
+            color: #2d3436;
+        }
+        
+        .type-security {
+            background: var(--color-err);
+            color: white;
+        }
+        
+        .type-maintenance {
+            background: var(--color-info);
+            color: white;
+        }
+        
+        .cancel-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-light);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .cancel-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .contact-admin-btn {
+            background: var(--color-info);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .contact-admin-btn:hover {
+            background: var(--color-patch);
+            transform: translateY(-2px);
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        /* Summary Styles */
+        .summary {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+        }
+        
+        .summary-item {
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .summary-icon {
+            margin-right: 8px;
+            font-size: 1.1em;
+        }
+        
+        .conversion-list {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+        
+        .conversion-item {
+            padding: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            font-family: monospace;
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        
+        .conversion-item.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .conversion-icon {
+            margin-right: 8px;
+            color: var(--color-patch);
+        }
+        
+        .rva-update {
+            color: var(--color-ok);
+            margin-left: 8px;
+            font-weight: bold;
+        }
+        
+        .offset-blur {
+            filter: blur(5px);
+            transition: filter 0.3s ease;
+            display: inline-block;
+            padding: 0 2px;
+            border-radius: 2px;
+            background: rgba(0, 0, 0, 0.2);
+        }
+        
+        .offset-blur:hover {
+            filter: blur(2px);
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        
+        /* Smooth animation for log entries */
+        .log-entry {
+            animation: fadeInUp 0.5s ease forwards;
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Processing animation */
+        .processing-animation {
+            display: inline-block;
+            margin-right: 8px;
+            animation: pulse 1.5s infinite;
+        }
+    </style>
+</head>
+<body>
+    <!-- Maintenance Modal -->
+    <div id="maintenanceModal" class="maintenance-modal">
+        <div class="maintenance-modal-content">
+            <div class="maintenance-icon">🚧</div>
+            <div class="maintenance-title">SYSTEM MAINTENANCE</div>
+            <div class="maintenance-message" id="maintenanceModalMessage">
+                System is currently under maintenance. Please try again later.
+            </div>
+            <div class="maintenance-time" id="maintenanceModalTime">
+                Started: Loading...
+            </div>
+            
+            <!-- Update Notes Section for Maintenance -->
+            <div id="maintenanceUpdateNotes" class="update-notes hidden">
+                <strong>Update Information:</strong>
+                <div id="maintenanceUpdateDetails"></div>
+            </div>
+            
+            <button class="btn" onclick="checkMaintenanceStatus()" style="width: 100%; margin-top: 10px; background: rgba(255,255,255,0.1);">🔄 Check Status</button>
+        </div>
+    </div>
+
+    <!-- Expiration Modal -->
+    <div id="expirationModal" class="expiration-modal">
+        <div class="expiration-modal-content">
+            <div class="expiration-icon">⚠️</div>
+            <div class="expiration-title">SUBSCRIPTION EXPIRED</div>
+            <div class="expiration-message" id="expirationModalMessage">
+                Your subscription has expired. Please contact administrator.
+            </div>
+            <div class="expiration-date" id="expirationModalDate">
+                Expired on: Loading...
+            </div>
+            <button class="cancel-btn" onclick="closeExpirationModal()">Close</button>
+        </div>
+    </div>
+
+    <!-- Update Modal -->
+    <div id="updateModal" class="update-modal">
+        <div class="update-modal-content">
+            <div class="update-icon">🚀</div>
+            <div class="update-title" id="updateModalTitle">New Update Available</div>
+            <div class="update-version" id="updateModalVersion">Version: Loading...</div>
+            <div class="update-type-badge" id="updateModalTypeBadge">Update</div>
+            
+            <div class="update-notes" id="updateModalNotes">
+                <!-- Update notes will be loaded here -->
+            </div>
+            
+            <button class="btn" onclick="closeUpdateModal()" style="width: 100%; margin-top: 10px; background: rgba(255,255,255,0.1);">Continue</button>
+        </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div id="forgotModal" class="forgot-modal">
+        <div class="forgot-modal-content">
+            <div class="forgot-icon">🔑</div>
+            <div class="forgot-title">FORGOT PASSWORD</div>
+            <div class="forgot-message">
+                Please contact the administrator to reset your password. You can reach out via Telegram for immediate assistance.
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; justify-content: center;">
+                <button class="cancel-btn" onclick="closeForgotModal()">Close</button>
+                <a href="https://t.me/r3nz75" target="_blank" class="contact-admin-btn" id="forgotPasswordLink">
+                    📱 Contact Admin
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Enhanced Header -->
+        <header class="main-header">
+            <h1 id="systemNameDisplay">🚀 STARZONE UPDATOR <span class="version-badge" id="systemVersionDisplay">v3.1</span></h1>
+            <p id="systemSubtitle">Enhanced Security & Privacy Features</p>
+        </header>
+
+        <!-- Enhanced Login Section -->
+        <div class="login-card" id="loginSection">
+            <div class="login-header">
+                <span class="login-icon">🔐</span>
+                <h2 class="login-title">Welcome Back</h2>
+                <p class="login-subtitle">Sign in to access your account</p>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">User Key</label>
+                <div class="input-group">
+                    <span class="input-icon">👤</span>
+                    <input type="text" id="userKey" class="form-input" placeholder="Enter your user key" autocomplete="username">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Password</label>
+                <div class="input-group">
+                    <span class="input-icon">🔒</span>
+                    <input type="password" id="userPassword" class="form-input" placeholder="Enter your password" autocomplete="current-password">
+                    <button type="button" class="password-toggle" onclick="togglePassword('userPassword')">👁️</button>
+                </div>
+            </div>
+
+            <div class="remember-group">
+                <div class="checkbox-group">
+                    <div class="checkbox" id="rememberCheckbox" onclick="toggleRememberMe()"></div>
+                    <label class="checkbox-label" onclick="toggleRememberMe()">Remember me</label>
+                </div>
+                <a href="#" class="forgot-link" onclick="showForgotPassword()">Forgot password?</a>
+            </div>
+
+            <button id="authBtn" class="login-btn" onclick="loginAuth()">
+                <span class="btn-icon">🔐</span>
+                Sign In
+            </button>
+
+            <div id="authStatus" class="auth-status">
+                <span class="status-indicator status-inactive"></span>
+                <span>Ready to authenticate</span>
+            </div>
+
+            <!-- Features Grid -->
+            <div class="features-grid">
+                <div class="feature-card">
+                    <span class="feature-icon">⚡</span>
+                    <h3 class="feature-title">Fast Processing</h3>
+                    <p class="feature-desc">Quick offset conversion with real-time progress tracking</p>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-icon">🔒</span>
+                    <h3 class="feature-title">Secure</h3>
+                    <p class="feature-desc">Enhanced security with device authentication</p>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-icon">🔄</span>
+                    <h3 class="feature-title">Auto Updates</h3>
+                    <p class="feature-desc">Automatic offset updates from dump files</p>
+                </div>
+            </div>
+
+            <div class="login-footer">
+                <p>Need help? Contact your administrator</p>
+                <div class="footer-links">
+                    <a href="#" class="footer-link" onclick="showHelp()">Help Center</a>
+                    <a href="#" class="footer-link" onclick="showPrivacy()">Privacy Policy</a>
+                    <a href="#" class="footer-link" onclick="showTerms()">Terms of Service</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content (Hidden until login) -->
+        <div class="card hidden" id="mainSection">
+            <div class="card-title">🔄 Conversion Settings</div>
+            
+            <!-- Account Information Panel -->
+            <div class="account-info-panel hidden" id="accountInfoPanel">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <strong style="color: var(--color-ok);">📋 Account Information</strong>
+                    <button class="copy-btn" onclick="copyDeviceId()" title="Copy Device ID">📋 Copy Device ID</button>
+                </div>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Device ID:</span>
+                        <span class="info-value" id="displayDeviceId">Loading...</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Devices Used:</span>
+                        <span class="info-value" id="devicesUsed">0/0</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Subscription:</span>
+                        <span class="info-value" id="subscriptionStatus">Loading...</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Expires In:</span>
+                        <span class="info-value" id="expirationCountdown">Loading...</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Device Info Panel -->
+            <div class="device-info-panel hidden" id="deviceInfoPanel">
+                <strong style="color: var(--color-info);">📱 Current Device</strong>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Device Name:</span>
+                        <span class="info-value" id="currentDeviceName">Loading...</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Operating System:</span>
+                        <span class="info-value" id="currentDeviceOS">Loading...</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Browser:</span>
+                        <span class="info-value" id="currentDeviceBrowser">Loading...</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Screen Resolution:</span>
+                        <span class="info-value" id="currentDeviceResolution">Loading...</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Conversion Mode</label>
+                <div class="conversion-group">
+                    <button class="conversion-btn" id="decToHexBtn" onclick="setConversionMode('decToHex')">
+                        <span class="btn-icon">🔢</span>
+                        Decimal → Hex
+                    </button>
+                    <button class="conversion-btn" id="hexToDecBtn" onclick="setConversionMode('hexToDec')">
+                        <span class="btn-icon">🔤</span>
+                        Hex → Decimal
+                    </button>
+                </div>
+                <div id="conversionModeDisplay" class="form-group">
+                    <span class="status-indicator status-inactive"></span>
+                    Current mode: <span id="currentMode">Not selected</span>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">File to Update</label>
+                <div class="file-upload-area" onclick="document.getElementById('fileInput').click()">
+                    📁 Click to select file or drag & drop here
+                    <input type="file" id="fileInput" accept=".txt,.cs,.json" style="display: none">
+                </div>
+                <div class="file-info" id="fileInfo">No file selected</div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Old Dump File</label>
+                <div class="file-upload-area" onclick="document.getElementById('oldDumpFile').click()">
+                    📁 Click to select OLD dump file or drag & drop here
+                    <input type="file" id="oldDumpFile" accept=".cs,.txt" style="display: none">
+                </div>
+                <div class="file-info" id="oldDumpInfo">No file selected</div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">New Dump File</label>
+                <div class="file-upload-area" onclick="document.getElementById('newDumpFile').click()">
+                    📁 Click to select NEW dump file or drag & drop here
+                    <input type="file" id="newDumpFile" accept=".cs,.txt" style="display: none">
+                </div>
+                <div class="file-info" id="newDumpInfo">No file selected</div>
+            </div>
+            
+            <button id="processBtn" class="btn" onclick="processFiles()" disabled>
+                <span class="btn-icon">⚡</span>
+                Process Files
+            </button>
+        </div>
+        
+        <!-- Processing Status Card -->
+        <div class="card">
+            <div class="card-title">
+                📊 Processing Status
+                <div class="card-actions">
+                    <button class="toggle-btn" id="blurToggle" onclick="toggleBlur()">
+                        👁️ Hide Offsets
+                    </button>
+                </div>
+            </div>
+            
+            <div class="step-indicator" id="stepIndicator">
+                <div class="step" id="step1">
+                    <div class="step-circle">1</div>
+                    <div class="step-text">Authentication</div>
+                </div>
+                <div class="step" id="step2">
+                    <div class="step-circle">2</div>
+                    <div class="step-text">File Analysis</div>
+                </div>
+                <div class="step" id="step3">
+                    <div class="step-circle">3</div>
+                    <div class="step-text">Conversion</div>
+                </div>
+                <div class="step" id="step4">
+                    <div class="step-circle">4</div>
+                    <div class="step-text">Completion</div>
+                </div>
+            </div>
+            
+            <div class="processing-stats" id="processingStats">
+                <div class="stat-item">
+                    <div class="stat-value" id="statOffsets">0</div>
+                    <div class="stat-label">Offsets Found</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="statConverted">0</div>
+                    <div class="stat-label">Converted</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="statUpdated">0</div>
+                    <div class="stat-label">Updated</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="statTime">0s</div>
+                    <div class="stat-label">Time</div>
+                </div>
+            </div>
+            
+            <div class="current-processing hidden" id="currentProcessing">
+                Currently processing: <span class="processing-line" id="currentLine">-</span>
+            </div>
+            
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="progress-text">
+                    <span id="progressText">Ready</span>
+                    <span class="progress-details" id="progressDetails"></span>
+                </div>
+            </div>
+            
+            <div class="log-container" id="logContainer">
+                <div class="log-info">Welcome to Starzone Updator v3.1</div>
+                <div class="log-info">Enhanced security with offset blurring feature</div>
+                <div class="log-info">Please authenticate to begin</div>
+            </div>
+        </div>
+        
+        <!-- Results Section -->
+        <div class="card hidden" id="resultsSection">
+            <div class="card-title">
+                ✅ Processing Complete
+                <div class="card-actions">
+                    <button class="toggle-btn" id="resultsBlurToggle" onclick="toggleResultsBlur()">
+                        👁️ Hide Offsets
+                    </button>
+                </div>
+            </div>
+            <div class="summary">
+                <div class="summary-item">
+                    <span class="summary-icon">📄</span>
+                    <span id="resultFile">File: Not processed</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-icon">🔄</span>
+                    <span id="resultOffsets">Base offsets converted: 0</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-icon">✅</span>
+                    <span id="resultMappings">Offset updated: 0</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-icon">⚡</span>
+                    <span id="resultTime">Processing time: 0s</span>
+                </div>
+            </div>
+            
+            <div class="conversion-list" id="conversionList">
+                <!-- Conversion details will appear here -->
+            </div>
+            
+            <div class="btn-group">
+                <button class="download-btn" onclick="downloadResult()">
+                    <span class="btn-icon">⬇️</span>
+                    Download Updated File
+                </button>
+                <button class="reset-btn" onclick="resetApp()">
+                    <span class="btn-icon">🔄</span>
+                    Start Over
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAU3TqXxMTwzRApmO00QdOnvwUrqq03mZ0",
+            authDomain: "waffujus-shop.firebaseapp.com",
+            databaseURL: "https://waffujus-shop-default-rtdb.firebaseio.com",
+            projectId: "waffujus-shop",
+            storageBucket: "waffujus-shop.firebasestorage.app",
+            messagingSenderId: "783507114347",
+            appId: "1:783507114347:android:6431a97ec8acf650e4642e"
+        };
+
+        // Initialize Firebase
+        let app;
+        let auth;
+        let rdb;
+
+        try {
+            app = firebase.initializeApp(firebaseConfig);
+            auth = firebase.auth();
+            rdb = firebase.database();
+            console.log('✅ Firebase initialized successfully');
+        } catch (error) {
+            console.error('❌ Firebase initialization error:', error);
+        }
+
+        // Enhanced Authentication State
+        let currentLoggedInUser = null;
+        let currentDeviceId = null;
+        let isRememberMeEnabled = localStorage.getItem('rememberMe') === 'true';
+        let autoLoginAttempted = false;
+
+        // App State Variables
+        let convertedContent = null;
+        let fileName = '';
+        let processingStartTime = 0;
+        let convertMap = {};
+        let conversionMode = null;
+        let oldDumpContent = null;
+        let newDumpContent = null;
+        let rvaMappings = {};
+        let updatedRvaCount = 0;
+        let functionNames = {};
+        let blurEnabled = false;
+        let resultsBlurEnabled = false;
+        let expirationTimer = null;
+        let lastSeenUpdateVersion = localStorage.getItem('lastSeenUpdateVersion') || '';
+        let forgotPasswordUrl = 'https://t.me/r3nz75'; // Default URL
+
+        // Fast Protection System
+        const FastProtection = {
+            init() {
+                document.addEventListener('contextmenu', (e) => e.preventDefault());
+                const originalLog = console.log;
+                console.log = function(...args) {
+                    if (args.some(arg => typeof arg === 'string' && arg.includes('HexPatches'))) {
+                        return;
+                    }
+                    originalLog.apply(console, args);
+                };
+            },
+            quickObfuscate(code) {
+                return code.replace(/\b(offset|patch|memory|hex)\b/g, '_$1_');
+            }
+        };
+
+        FastProtection.init();
+
+        // Format date to 12-hour format (YYYY-MM-DD HH:MM:SS AM/PM)
+        function formatDateTime12hr(dateString) {
+            if (!dateString) {
+                return 'No date';
+            }
+            
+            try {
+                const date = new Date(dateString);
+                
+                // Check if date is valid
+                if (isNaN(date.getTime())) {
+                    return 'Invalid date format';
+                }
+                
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                
+                let hours = date.getHours();
+                const minutes = String(date.getMinutes()).padStart(2, '0');
+                const seconds = String(date.getSeconds()).padStart(2, '0');
+                const ampm = hours >= 12 ? 'PM' : 'AM';
+                
+                hours = hours % 12;
+                hours = hours ? hours : 12; // the hour '0' should be '12'
+                hours = String(hours).padStart(2, '0');
+                
+                return `${year}-${month}-${day} ${hours}:${minutes}:${seconds} ${ampm}`;
+            } catch (error) {
+                console.error('Error formatting date:', error);
+                return 'Date format error';
+            }
+        }
+
+        // Format date for expiration display (12-hour format)
+        function formatExpirationDate(dateString) {
+            if (!dateString) {
+                return 'No expiration date';
+            }
+            
+            try {
+                const date = new Date(dateString);
+                
+                // Check if date is valid
+                if (isNaN(date.getTime())) {
+                    return 'Invalid date format';
+                }
+                
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                
+                let hours = date.getHours();
+                const minutes = String(date.getMinutes()).padStart(2, '0');
+                const ampm = hours >= 12 ? 'PM' : 'AM';
+                
+                hours = hours % 12;
+                hours = hours ? hours : 12; // the hour '0' should be '12'
+                hours = String(hours).padStart(2, '0');
+                
+                return `${year}-${month}-${day} ${hours}:${minutes} ${ampm}`;
+            } catch (error) {
+                console.error('Error formatting date:', error);
+                return 'Date format error';
+            }
+        }
+
+        // Initialize device UUID - persistent per device
+        function initializeDeviceUUID() {
+            let deviceUUID = localStorage.getItem('starzone_device_uuid');
+            
+            if (!deviceUUID) {
+                deviceUUID = generateUUID();
+                localStorage.setItem('starzone_device_uuid', deviceUUID);
+                log('🆕 Generated new persistent device UUID', 'info');
+            } else {
+                log('🔑 Using existing device UUID', 'info');
+            }
+            
+            currentDeviceId = deviceUUID;
+            return deviceUUID;
+        }
+
+        function generateUUID() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                const r = Math.random() * 16 | 0;
+                const v = c === 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+
+        // Copy device ID to clipboard
+        function copyDeviceId() {
+            navigator.clipboard.writeText(currentDeviceId).then(function() {
+                log('📋 Device ID copied to clipboard!', 'ok');
+                // Show temporary feedback
+                const copyBtn = document.querySelector('.copy-btn');
+                const originalText = copyBtn.textContent;
+                copyBtn.textContent = '✅ Copied!';
+                setTimeout(() => {
+                    copyBtn.textContent = originalText;
+                }, 2000);
+            }).catch(function(err) {
+                log('❌ Failed to copy Device ID: ' + err, 'err');
+            });
+        }
+
+        // Calculate days until expiration
+        function getDaysUntilExpiration(expirationDate) {
+            if (!expirationDate) {
+                return -1; // Treat as expired if no date
+            }
+            
+            try {
+                const now = new Date();
+                const expiration = new Date(expirationDate);
+                
+                if (isNaN(expiration.getTime())) {
+                    return -1; // Treat as expired if invalid date
+                }
+                
+                const diffTime = expiration - now;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                return diffDays;
+            } catch (error) {
+                console.error('Error calculating expiration:', error);
+                return -1;
+            }
+        }
+
+        // Format expiration display
+        function formatExpirationDisplay(daysUntilExpiration) {
+            if (daysUntilExpiration < 0) {
+                return '<span class="expiration-critical">EXPIRED</span>';
+            } else if (daysUntilExpiration === 0) {
+                return '<span class="expiration-critical">Expires Today</span>';
+            } else if (daysUntilExpiration <= 7) {
+                return `<span class="expiration-warning">${daysUntilExpiration} days</span>`;
+            } else {
+                return `<span>${daysUntilExpiration} days</span>`;
+            }
+        }
+
+        // Update expiration countdown
+        function startExpirationCountdown(expirationDate) {
+            if (expirationTimer) {
+                clearInterval(expirationTimer);
+            }
+
+            function updateCountdown() {
+                const daysUntilExpiration = getDaysUntilExpiration(expirationDate);
+                document.getElementById('expirationCountdown').innerHTML = formatExpirationDisplay(daysUntilExpiration);
+                
+                // Update subscription status
+                if (daysUntilExpiration < 0) {
+                    document.getElementById('subscriptionStatus').innerHTML = '<span class="expiration-critical">Expired</span>';
+                } else if (daysUntilExpiration <= 7) {
+                    document.getElementById('subscriptionStatus').innerHTML = '<span class="expiration-warning">Expiring Soon</span>';
+                } else {
+                    document.getElementById('subscriptionStatus').textContent = 'Active';
+                }
+            }
+
+            // Update immediately and then every minute
+            updateCountdown();
+            expirationTimer = setInterval(updateCountdown, 60000);
+        }
+
+        // Get device information
+        function getDeviceInfo() {
+            const userAgent = navigator.userAgent;
+            let deviceName = 'Unknown Device';
+            let osType = 'Unknown OS';
+            
+            // Detect OS
+            if (userAgent.includes('Windows')) {
+                osType = 'Windows';
+                deviceName = 'Windows PC';
+            } else if (userAgent.includes('Mac')) {
+                osType = 'macOS';
+                deviceName = 'Mac Computer';
+            } else if (userAgent.includes('Linux')) {
+                osType = 'Linux';
+                deviceName = 'Linux PC';
+            } else if (userAgent.includes('Android')) {
+                osType = 'Android';
+                deviceName = 'Android Device';
+            } else if (userAgent.includes('iOS') || userAgent.includes('iPhone') || userAgent.includes('iPad')) {
+                osType = 'iOS';
+                deviceName = 'Apple Device';
+            }
+            
+            // Detect browser
+            let browser = 'Unknown Browser';
+            if (userAgent.includes('Chrome') && !userAgent.includes('Edg')) {
+                browser = 'Chrome';
+            } else if (userAgent.includes('Firefox')) {
+                browser = 'Firefox';
+            } else if (userAgent.includes('Safari') && !userAgent.includes('Chrome')) {
+                browser = 'Safari';
+            } else if (userAgent.includes('Edg')) {
+                browser = 'Edge';
+            }
+            
+            return {
+                device_id: currentDeviceId,
+                device_name: deviceName,
+                os_type: osType,
+                browser: browser,
+                user_agent: userAgent,
+                screen_resolution: `${screen.width}x${screen.height}`,
+                last_login: new Date().toISOString(),
+                status: 'active'
+            };
+        }
+
+        // Update device information in Firebase
+        async function updateDeviceInfo(userId) {
+            try {
+                const deviceInfo = getDeviceInfo();
+                const userAgent = navigator.userAgent;
+                
+                // Get IP address (approximate)
+                let ipAddress = 'Unknown';
+                try {
+                    const response = await fetch('https://api.ipify.org?format=json');
+                    const data = await response.json();
+                    ipAddress = data.ip;
+                } catch (ipError) {
+                    console.log('Could not fetch IP address');
+                }
+                
+                deviceInfo.ip_address = ipAddress;
+                
+                // Update device in user's devices list
+                await rdb.ref(`users/${userId}/devices/${currentDeviceId}`).set(deviceInfo);
+                
+                log(`📱 Device registered: ${deviceInfo.device_name}`, 'ok');
+                return deviceInfo;
+            } catch (error) {
+                console.error('Error updating device info:', error);
+                log('❌ Error registering device', 'err');
+                return null;
+            }
+        }
+
+        // Check device limit and current device status
+        async function checkDeviceStatus(userId, userData) {
+            const devices = userData.devices || {};
+            const deviceLimit = userData.device_limit || 3;
+            const currentDevices = Object.keys(devices).length;
+            
+            // Check if current device is banned
+            if (devices[currentDeviceId] && devices[currentDeviceId].status === 'banned') {
+                const banReason = devices[currentDeviceId].ban_reason || 'No reason provided';
+                return {
+                    allowed: false,
+                    reason: `This device is banned. Reason: ${banReason}`,
+                    devicesUsed: currentDevices,
+                    deviceLimit: deviceLimit
+                };
+            }
+            
+            // Check if device limit is reached
+            if (currentDevices >= deviceLimit && !devices[currentDeviceId]) {
+                return {
+                    allowed: false,
+                    reason: `Device limit reached (${currentDevices}/${deviceLimit}). Please remove unused devices or contact admin.`,
+                    devicesUsed: currentDevices,
+                    deviceLimit: deviceLimit
+                };
+            }
+            
+            return {
+                allowed: true,
+                devicesUsed: currentDevices,
+                deviceLimit: deviceLimit
+            };
+        }
+
+        // Check subscription status and show modal if expired
+        async function checkSubscriptionStatus(userData) {
+            if (!userData.expiration) {
+                // No expiration date set - treat as expired
+                await showExpirationModal(userData);
+                return false;
+            }
+            
+            try {
+                const expiration = new Date(userData.expiration);
+                const now = new Date();
+                
+                if (isNaN(expiration.getTime()) || now > expiration) {
+                    // Invalid date or expired - show modal
+                    await showExpirationModal(userData);
+                    return false;
+                }
+                return true;
+            } catch (error) {
+                console.error('Error checking subscription:', error);
+                await showExpirationModal(userData);
+                return false;
+            }
+        }
+
+        // Show expiration modal
+        async function showExpirationModal(userData) {
+            // Handle expiration date display with error checking
+            let expirationDateText = 'Unknown';
+            if (userData.expiration) {
+                try {
+                    const expiration = new Date(userData.expiration);
+                    if (!isNaN(expiration.getTime())) {
+                        expirationDateText = formatExpirationDate(userData.expiration);
+                    } else {
+                        expirationDateText = 'Invalid date format';
+                    }
+                } catch (error) {
+                    expirationDateText = 'Date error';
+                }
+            }
+            
+            document.getElementById('expirationModalDate').textContent = 'Expired on: ' + expirationDateText;
+            
+            // Show modal
+            document.getElementById('expirationModal').style.display = 'flex';
+            
+            // Disable all functionality
+            document.getElementById('processBtn').disabled = true;
+            document.getElementById('fileInput').disabled = true;
+            document.getElementById('oldDumpFile').disabled = true;
+            document.getElementById('newDumpFile').disabled = true;
+        }
+
+        // Close expiration modal
+        function closeExpirationModal() {
+            document.getElementById('expirationModal').style.display = 'none';
+        }
+
+        // Close update modal
+        function closeUpdateModal() {
+            document.getElementById('updateModal').style.display = 'none';
+        }
+
+        // Show forgot password modal
+        function showForgotPassword() {
+            // Update the forgot password link with the current URL from system settings
+            const forgotLink = document.getElementById('forgotPasswordLink');
+            forgotLink.href = forgotPasswordUrl;
+            document.getElementById('forgotModal').style.display = 'flex';
+        }
+
+        // Close forgot password modal
+        function closeForgotModal() {
+            document.getElementById('forgotModal').style.display = 'none';
+        }
+
+        // Check for system updates
+        async function checkForUpdates() {
+            try {
+                const updateRef = rdb.ref('current_update');
+                const snapshot = await updateRef.once('value');
+                
+                if (snapshot.exists()) {
+                    const updateData = snapshot.val();
+                    
+                    // Check if this is a new update that user hasn't seen
+                    if (updateData.version !== lastSeenUpdateVersion) {
+                        showUpdateModal(updateData);
+                    }
+                }
+            } catch (error) {
+                console.error('Error checking for updates:', error);
+            }
+        }
+
+        // Show update modal
+        function showUpdateModal(updateData) {
+            document.getElementById('updateModalTitle').textContent = updateData.title;
+            document.getElementById('updateModalVersion').textContent = `Version: ${updateData.version}`;
+            
+            // Set update type badge
+            const typeBadge = document.getElementById('updateModalTypeBadge');
+            typeBadge.textContent = getUpdateTypeDisplay(updateData.type);
+            typeBadge.className = `update-type-badge type-${updateData.type}`;
+            
+            // Format update notes
+            const notesContainer = document.getElementById('updateModalNotes');
+            if (updateData.notes) {
+                const notesHtml = updateData.notes.split('\n').map(note => 
+                    `<div class="update-item">${note}</div>`
+                ).join('');
+                notesContainer.innerHTML = notesHtml;
+            } else {
+                notesContainer.innerHTML = '<div class="update-item">No update notes provided.</div>';
+            }
+            
+            // Show modal
+            document.getElementById('updateModal').style.display = 'flex';
+            
+            // Remember that user has seen this update
+            lastSeenUpdateVersion = updateData.version;
+            localStorage.setItem('lastSeenUpdateVersion', updateData.version);
+        }
+
+        // Get display text for update type
+        function getUpdateTypeDisplay(type) {
+            switch(type) {
+                case 'feature': return 'New Feature';
+                case 'bugfix': return 'Bug Fix';
+                case 'security': return 'Security Update';
+                case 'maintenance': return 'Maintenance';
+                default: return 'Update';
+            }
+        }
+
+        // Load system settings (name and version)
+        async function loadSystemSettings() {
+            try {
+                const settingsRef = rdb.ref('system_settings');
+                const snapshot = await settingsRef.once('value');
+                
+                if (snapshot.exists()) {
+                    const settings = snapshot.val();
+                    const systemName = settings.system_name || 'STARZONE UPDATOR';
+                    const systemVersion = settings.system_version || 'v3.1';
+                    const systemSubtitle = settings.system_subtitle || 'Enhanced Security & Privacy Features';
+                    
+                    // Update forgot password URL
+                    if (settings.forgot_password_url) {
+                        forgotPasswordUrl = settings.forgot_password_url;
+                    }
+                    
+                    // Update page title
+                    document.title = `${systemName} ${systemVersion} - Web Version`;
+                    
+                    // Update header
+                    document.getElementById('systemNameDisplay').innerHTML = `🚀 ${systemName} <span class="version-badge" id="systemVersionDisplay">${systemVersion}</span>`;
+                    document.getElementById('systemSubtitle').textContent = systemSubtitle;
+                    
+                    // Update welcome message in logs
+                    const logContainer = document.getElementById('logContainer');
+                    if (logContainer.innerHTML.includes('Welcome to Starzone Updator v3.1')) {
+                        logContainer.innerHTML = logContainer.innerHTML.replace(
+                            'Welcome to Starzone Updator v3.1',
+                            `Welcome to ${systemName} ${systemVersion}`
+                        );
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading system settings:', error);
+            }
+        }
+
+        // Check maintenance status - UPDATED TO AUTO-STOP WHEN VERSION MATCHES
+        async function checkMaintenanceStatus() {
+            try {
+                const maintenanceRef = rdb.ref('maintenance');
+                const snapshot = await maintenanceRef.once('value');
+                
+                if (snapshot.exists()) {
+                    const maintenanceData = snapshot.val();
+                    if (maintenanceData.active) {
+                        // NEW: Check if system version matches update version
+                        const systemVersion = document.getElementById('systemVersionDisplay').textContent;
+                        const updateRef = rdb.ref('current_update');
+                        const updateSnapshot = await updateRef.once('value');
+                        
+                        let shouldStopMaintenance = false;
+                        let stopReason = '';
+                        
+                        if (updateSnapshot.exists()) {
+                            const updateData = updateSnapshot.val();
+                            if (systemVersion === updateData.version) {
+                                shouldStopMaintenance = true;
+                                stopReason = 'System version matches update version - maintenance completed';
+                            }
+                        }
+                        
+                        if (shouldStopMaintenance) {
+                            // Auto-stop maintenance
+                            await rdb.ref('maintenance').update({
+                                active: false,
+                                stopped_at: new Date().toISOString(),
+                                stopped_by: 'auto-system',
+                                stopped_reason: stopReason
+                            });
+                            
+                            log('🔄 Maintenance automatically stopped - versions match', 'ok');
+                            return true; // Maintenance is now inactive
+                        }
+                        
+                        // Show maintenance modal and disable functionality
+                        document.getElementById('maintenanceModal').style.display = 'flex';
+                        document.getElementById('maintenanceModalMessage').textContent = maintenanceData.reason || 'System maintenance in progress';
+                        document.getElementById('maintenanceModalTime').textContent = 'Started: ' + formatDateTime12hr(maintenanceData.started_at);
+                        
+                        // Check if there's an associated update with notes
+                        const updateNotesSection = document.getElementById('maintenanceUpdateNotes');
+                        const updateDetails = document.getElementById('maintenanceUpdateDetails');
+                        
+                        if (maintenanceData.update_version) {
+                            // Try to load update details
+                            try {
+                                const updateRef = rdb.ref('current_update');
+                                const updateSnapshot = await updateRef.once('value');
+                                
+                                if (updateSnapshot.exists()) {
+                                    const updateData = updateSnapshot.val();
+                                    if (updateData.notes) {
+                                        // Show update notes in maintenance modal
+                                        updateNotesSection.classList.remove('hidden');
+                                        const notesHtml = updateData.notes.split('\n').map(note => 
+                                            `<div class="update-item">${note}</div>`
+                                        ).join('');
+                                        updateDetails.innerHTML = `
+                                            <div><strong>Version:</strong> ${updateData.version}</div>
+                                            <div><strong>Title:</strong> ${updateData.title}</div>
+                                            <div style="margin-top: 10px;"><strong>Update Notes:</strong></div>
+                                            ${notesHtml}
+                                        `;
+                                    }
+                                }
+                            } catch (updateError) {
+                                console.error('Error loading update details for maintenance:', updateError);
+                            }
+                        } else {
+                            updateNotesSection.classList.add('hidden');
+                        }
+                        
+                        // Disable all functionality
+                        document.getElementById('authBtn').disabled = true;
+                        document.getElementById('processBtn').disabled = true;
+                        document.getElementById('fileInput').disabled = true;
+                        document.getElementById('oldDumpFile').disabled = true;
+                        document.getElementById('newDumpFile').disabled = true;
+                        
+                        log('🚧 System under maintenance - Please try again later', 'warn');
+                        return false;
+                    }
+                }
+                
+                // No maintenance - enable functionality
+                document.getElementById('maintenanceModal').style.display = 'none';
+                document.getElementById('authBtn').disabled = false;
+                document.getElementById('fileInput').disabled = false;
+                document.getElementById('oldDumpFile').disabled = false;
+                document.getElementById('newDumpFile').disabled = false;
+                
+                // Re-enable process button if conditions are met
+                checkProcessButton();
+                return true;
+            } catch (error) {
+                console.error('Error checking maintenance status:', error);
+                return true; // Assume no maintenance on error
+            }
+        }
+
+        // Update account information display to show exact date - FIXED VERSION
+        function updateAccountInfoDisplay(userData, deviceStatus) {
+            // Update device ID display
+            document.getElementById('displayDeviceId').textContent = currentDeviceId;
+            
+            // Update devices used
+            document.getElementById('devicesUsed').textContent = `${deviceStatus.devicesUsed}/${deviceStatus.deviceLimit}`;
+            
+            // Update device info
+            const deviceInfo = getDeviceInfo();
+            document.getElementById('currentDeviceName').textContent = deviceInfo.device_name;
+            document.getElementById('currentDeviceOS').textContent = deviceInfo.os_type;
+            document.getElementById('currentDeviceBrowser').textContent = deviceInfo.browser;
+            document.getElementById('currentDeviceResolution').textContent = deviceInfo.screen_resolution;
+            
+            // Update expiration display to show exact date with error handling
+            let expirationDateText = 'No expiration date';
+            let subscriptionStatusText = 'Unknown';
+            
+            if (userData.expiration) {
+                try {
+                    const expiration = new Date(userData.expiration);
+                    if (!isNaN(expiration.getTime())) {
+                        expirationDateText = formatExpirationDate(userData.expiration);
+                        const now = new Date();
+                        
+                        if (now > expiration) {
+                            subscriptionStatusText = '<span class="expiration-critical">Expired</span>';
+                        } else {
+                            const diffTime = expiration - now;
+                            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                            
+                            if (diffDays <= 7) {
+                                subscriptionStatusText = '<span class="expiration-warning">Expiring Soon</span>';
+                            } else {
+                                subscriptionStatusText = 'Active';
+                            }
+                        }
+                    } else {
+                        subscriptionStatusText = '<span class="expiration-critical">Invalid Date</span>';
+                    }
+                } catch (error) {
+                    console.error('Error processing expiration date:', error);
+                    subscriptionStatusText = '<span class="expiration-critical">Date Error</span>';
+                }
+            } else {
+                subscriptionStatusText = '<span class="expiration-critical">No Date Set</span>';
+            }
+            
+            document.getElementById('subscriptionStatus').innerHTML = subscriptionStatusText;
+            document.getElementById('expirationCountdown').textContent = expirationDateText;
+            
+            // Show account info panels
+            document.getElementById('accountInfoPanel').classList.remove('hidden');
+            document.getElementById('deviceInfoPanel').classList.remove('hidden');
+        }
+
+        // Enhanced login functions
+        function initializeEnhancedLogin() {
+            // Load saved credentials if remember me is enabled
+            if (isRememberMeEnabled) {
+                const savedUserKey = localStorage.getItem('starzone_user_key');
+                const savedPassword = localStorage.getItem('starzone_password');
+                
+                if (savedUserKey) {
+                    document.getElementById('userKey').value = savedUserKey;
+                    if (savedPassword) {
+                        document.getElementById('userPassword').value = savedPassword;
+                    }
+                    updateAuthStatus('🔑 Found saved credentials', 'info');
+                }
+                
+                // Update checkbox state
+                document.getElementById('rememberCheckbox').classList.add('checked');
+            }
+
+            // Add enter key support
+            document.getElementById('userPassword').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    loginAuth();
+                }
+            });
+
+            document.getElementById('userKey').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    document.getElementById('userPassword').focus();
+                }
+            });
+
+            // Add input animations
+            const inputs = document.querySelectorAll('.form-input');
+            inputs.forEach(input => {
+                input.addEventListener('focus', function() {
+                    this.parentElement.classList.add('focused');
+                });
+                
+                input.addEventListener('blur', function() {
+                    this.parentElement.classList.remove('focused');
+                });
+            });
+
+            // Auto-focus user key field
+            setTimeout(() => {
+                document.getElementById('userKey').focus();
+            }, 500);
+        }
+
+        // Enhanced authentication status updates
+        function updateAuthStatus(message, type = 'info') {
+            const statusElement = document.getElementById('authStatus');
+            const indicator = statusElement.querySelector('.status-indicator');
+            
+            // Remove all status classes
+            indicator.classList.remove('status-active', 'status-inactive', 'status-processing');
+            statusElement.style.background = 'rgba(255, 255, 255, 0.05)';
+            
+            switch(type) {
+                case 'success':
+                    indicator.classList.add('status-active');
+                    statusElement.style.background = 'rgba(0, 184, 148, 0.1)';
+                    statusElement.style.borderColor = 'rgba(0, 184, 148, 0.3)';
+                    break;
+                case 'error':
+                    indicator.classList.add('status-inactive');
+                    statusElement.style.background = 'rgba(214, 48, 49, 0.1)';
+                    statusElement.style.borderColor = 'rgba(214, 48, 49, 0.3)';
+                    break;
+                case 'warning':
+                    indicator.classList.add('status-processing');
+                    statusElement.style.background = 'rgba(253, 203, 110, 0.1)';
+                    statusElement.style.borderColor = 'rgba(253, 203, 110, 0.3)';
+                    break;
+                case 'info':
+                default:
+                    indicator.classList.add('status-inactive');
+                    break;
+            }
+            
+            statusElement.querySelector('span:last-child').textContent = message;
+        }
+
+        // Enhanced login function
+        async function loginAuth() {
+            // Check maintenance status first
+            const maintenanceActive = await checkMaintenanceStatus();
+            if (!maintenanceActive) {
+                updateAuthStatus('❌ Cannot authenticate during maintenance', 'error');
+                return;
+            }
+
+            const userKey = document.getElementById('userKey').value.trim();
+            const password = document.getElementById('userPassword').value;
+            const authBtn = document.getElementById('authBtn');
+
+            if (!userKey || !password) {
+                updateAuthStatus('❌ Please enter both user key and password', 'error');
+                shakeElement(document.getElementById('loginSection'));
+                return;
+            }
+
+            // Update UI for loading state
+            authBtn.disabled = true;
+            authBtn.classList.add('login-btn-loading');
+            authBtn.innerHTML = 'Authenticating...';
+            
+            updateAuthStatus('🔐 Authenticating...', 'warning');
+            updateStep(1, 'active');
+            updateProgress('Authenticating', 0, 1);
+
+            try {
+                // Find user by user key
+                const userInfo = await findUserByKey(userKey);
+                
+                if (!userInfo) {
+                    updateAuthStatus('❌ Invalid user key or user not found', 'error');
+                    shakeElement(document.getElementById('loginSection'));
+                    return;
+                }
+
+                const { userId, userData } = userInfo;
+                
+                // Check if user is banned
+                if (userData.status === 'banned') {
+                    const banReason = userData.banReason || 'No reason provided';
+                    updateAuthStatus(`❌ Account is banned: ${banReason}`, 'error');
+                    return;
+                }
+                
+                // Check device status
+                const deviceStatus = await checkDeviceStatus(userId, userData);
+                if (!deviceStatus.allowed) {
+                    updateAuthStatus(`❌ ${deviceStatus.reason}`, 'error');
+                    return;
+                }
+                
+                // Check subscription status
+                const isSubscriptionValid = await checkSubscriptionStatus(userData);
+                if (!isSubscriptionValid) {
+                    updateAuthStatus('❌ Subscription expired', 'error');
+                    return;
+                }
+                
+                // Try to sign in with the email and password
+                try {
+                    const userCredential = await auth.signInWithEmailAndPassword(userData.email, password);
+                    currentLoggedInUser = userCredential.user;
+                    
+                    // Update device information
+                    const deviceInfo = await updateDeviceInfo(userId);
+                    
+                    // Update account information display
+                    updateAccountInfoDisplay(userData, deviceStatus);
+                    
+                    // Success - show processing section
+                    updateAuthStatus('✅ Authenticated & Ready', 'success');
+                    document.getElementById('mainSection').classList.remove('hidden');
+                    document.getElementById('conversionModeDisplay').innerHTML = 
+                        '<span class="status-indicator status-active"></span> Current mode: <span id="currentMode">Not selected</span>';
+                    
+                    log('✅ User authenticated successfully!', 'ok');
+                    log(`📱 Device: ${deviceInfo.device_name} (${deviceStatus.devicesUsed}/${deviceStatus.deviceLimit} devices)`, 'info');
+                    
+                    // Enhanced expiration logging
+                    if (userData.expiration) {
+                        try {
+                            const expiration = new Date(userData.expiration);
+                            if (!isNaN(expiration.getTime())) {
+                                log(`📅 Subscription valid until: ${formatExpirationDate(userData.expiration)}`, 'info');
+                            }
+                        } catch (error) {
+                            log('⚠️ Could not read subscription date', 'warn');
+                        }
+                    }
+                    
+                    updateProgress('Authentication Complete', 1, 1);
+                    updateStep(1, 'completed');
+                    
+                    // Save credentials if remember me is enabled
+                    if (isRememberMeEnabled) {
+                        localStorage.setItem('starzone_user_key', userKey);
+                        localStorage.setItem('starzone_password', password);
+                    } else {
+                        // Clear saved credentials
+                        localStorage.removeItem('starzone_user_key');
+                        localStorage.removeItem('starzone_password');
+                    }
+                    
+                    // Add success animation
+                    document.getElementById('loginSection').classList.add('login-success');
+                    setTimeout(() => {
+                        document.getElementById('loginSection').classList.remove('login-success');
+                    }, 500);
+                    
+                } catch (authError) {
+                    if (authError.code === 'auth/invalid-login-credentials' || authError.code === 'auth/wrong-password') {
+                        updateAuthStatus('❌ Invalid password', 'error');
+                        shakeElement(document.getElementById('loginSection'));
+                    } else {
+                        updateAuthStatus(`❌ Authentication failed: ${authError.message}`, 'error');
+                    }
+                    updateProgress('Authentication Failed', 0, 1);
+                }
+                
+            } catch (error) {
+                console.error('User login error:', error);
+                updateAuthStatus(`❌ Login failed: ${error.message}`, 'error');
+                updateProgress('Authentication Failed', 0, 1);
+            } finally {
+                // Reset button state
+                authBtn.disabled = false;
+                authBtn.classList.remove('login-btn-loading');
+                authBtn.innerHTML = '<span class="btn-icon">🔐</span> Sign In';
+            }
+        }
+
+        // Enhanced helper functions
+        function toggleRememberMe() {
+            isRememberMeEnabled = !isRememberMeEnabled;
+            const checkbox = document.getElementById('rememberCheckbox');
+            
+            if (isRememberMeEnabled) {
+                checkbox.classList.add('checked');
+                localStorage.setItem('rememberMe', 'true');
+            } else {
+                checkbox.classList.remove('checked');
+                localStorage.setItem('rememberMe', 'false');
+                // Clear saved credentials when remember me is disabled
+                localStorage.removeItem('starzone_user_key');
+                localStorage.removeItem('starzone_password');
+            }
+        }
+
+        function togglePassword(inputId) {
+            const input = document.getElementById(inputId);
+            const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+            input.setAttribute('type', type);
+        }
+
+        function shakeElement(element) {
+            element.style.animation = 'none';
+            setTimeout(() => {
+                element.style.animation = 'shake 0.5s ease-in-out';
+            }, 10);
+            
+            setTimeout(() => {
+                element.style.animation = '';
+            }, 500);
+        }
+
+        // Enhanced placeholder functions
+        function showHelp() {
+            alert('Help Center:\n\n1. Ensure you have a valid user key and password\n2. Check your subscription status\n3. Contact administrator for device issues\n4. Make sure you have stable internet connection');
+        }
+
+        function showPrivacy() {
+            alert('Privacy Policy:\n\nYour data is securely stored and encrypted. We do not share your personal information with third parties. All authentication is handled through secure Firebase services.');
+        }
+
+        function showTerms() {
+            alert('Terms of Service:\n\n1. Use the service responsibly\n2. Do not share your credentials\n3. Respect device limits\n4. Follow administrator guidelines\n5. Report any security concerns immediately');
+        }
+
+        // Enhanced auto-login on page load
+        function attemptAutoLogin() {
+            if (isRememberMeEnabled && !autoLoginAttempted) {
+                const savedUserKey = localStorage.getItem('starzone_user_key');
+                const savedPassword = localStorage.getItem('starzone_password');
+                
+                if (savedUserKey && savedPassword) {
+                    autoLoginAttempted = true;
+                    setTimeout(() => {
+                        updateAuthStatus('🔄 Attempting auto-login...', 'warning');
+                        loginAuth();
+                    }, 1000);
+                }
+            }
+        }
+
+        // Find user by user key
+        async function findUserByKey(userKey) {
+            try {
+                const usersRef = rdb.ref('users');
+                const snapshot = await usersRef.once('value');
+                
+                if (snapshot.exists()) {
+                    const users = snapshot.val();
+                    for (const userId in users) {
+                        if (users[userId].user_key === userKey) {
+                            return { userId, userData: users[userId] };
+                        }
+                    }
+                }
+                return null;
+            } catch (error) {
+                console.error('Error finding user by key:', error);
+                return null;
+            }
+        }
+
+        // Enhanced conversion mode function
+        function setConversionMode(mode) {
+            conversionMode = mode;
+            const currentMode = document.getElementById('currentMode');
+            const decToHexBtn = document.getElementById('decToHexBtn');
+            const hexToDecBtn = document.getElementById('hexToDecBtn');
+            
+            // Remove active class from all buttons
+            decToHexBtn.classList.remove('active');
+            hexToDecBtn.classList.remove('active');
+            
+            if (mode === 'decToHex') {
+                currentMode.textContent = 'Decimal → Hex';
+                decToHexBtn.classList.add('active');
+                log('🔧 Conversion mode set: Decimal → Hex', 'info');
+            } else {
+                currentMode.textContent = 'Hex → Decimal';
+                hexToDecBtn.classList.add('active');
+                log('🔧 Conversion mode set: Hex → Decimal', 'info');
+            }
+            checkProcessButton();
+        }
+
+        // Initialize the enhanced app
+        function initializeApp() {
+            initializeDeviceUUID();
+            setupFileUploads();
+            loadSystemSettings();
+            initializeEnhancedLogin();
+            checkMaintenanceStatus();
+            checkForUpdates();
+            attemptAutoLogin(); // Try auto-login after initialization
+        }
+
+        // File handling functions
+        function setupFileUploads() {
+            const setupFileHandler = (fileInputId, infoId) => {
+                const fileInput = document.getElementById(fileInputId);
+                const fileInfo = document.getElementById(infoId);
+                const uploadArea = fileInput.parentElement;
+                
+                fileInput.addEventListener('change', function(e) {
+                    if (this.files[0]) {
+                        fileInfo.textContent = `Selected: ${this.files[0].name} (${formatFileSize(this.files[0].size)})`;
+                        fileInfo.className = 'file-info log-ok';
+                        checkProcessButton();
+                    }
+                });
+                
+                // Setup drag and drop
+                uploadArea.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    this.classList.add('drag-over');
+                });
+                
+                uploadArea.addEventListener('dragleave', function(e) {
+                    e.preventDefault();
+                    this.classList.remove('drag-over');
+                });
+                
+                uploadArea.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    this.classList.remove('drag-over');
+                    
+                    if (e.dataTransfer.files.length > 0) {
+                        fileInput.files = e.dataTransfer.files;
+                        const file = e.dataTransfer.files[0];
+                        fileInfo.textContent = `Selected: ${file.name} (${formatFileSize(file.size)})`;
+                        fileInfo.className = 'file-info log-ok';
+                        checkProcessButton();
+                    }
+                });
+            };
+            
+            setupFileHandler('fileInput', 'fileInfo');
+            setupFileHandler('oldDumpFile', 'oldDumpInfo');
+            setupFileHandler('newDumpFile', 'newDumpInfo');
+        }
+        
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function checkProcessButton() {
+            const fileInput = document.getElementById('fileInput');
+            const processBtn = document.getElementById('processBtn');
+            processBtn.disabled = !(fileInput.files.length > 0 && conversionMode && currentLoggedInUser);
+        }
+
+        // Logging and UI functions
+        function log(message, color = null) {
+            const logContainer = document.getElementById('logContainer');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry';
+            if (color) logEntry.classList.add(`log-${color}`);
+            
+            // Apply blur to offset values if blur is enabled
+            let processedMessage = message;
+            if (blurEnabled) {
+                processedMessage = blurOffsets(message);
+            }
+            
+            logEntry.innerHTML = `<span style="opacity:0.6">[${timestamp}]</span> ${processedMessage}`;
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        // Function to blur offset values in log messages
+        function blurOffsets(message) {
+            // Blur hex offsets (0x followed by hex characters) - improved regex
+            message = message.replace(/(0x[0-9A-Fa-f]+)/gi, '<span class="offset-blur">$1</span>');
+            
+            // Blur decimal offsets (numbers with 3+ digits)
+            message = message.replace(/(\b\d{3,}\b)/g, '<span class="offset-blur">$1</span>');
+            
+            // Blur RVA mappings
+            message = message.replace(/(RVA:\s*)(0x[0-9A-Fa-f]+)/gi, '$1<span class="offset-blur">$2</span>');
+            
+            return message;
+        }
+
+        function updateProgress(text, current, total, details = '') {
+            const progressFill = document.getElementById('progressFill');
+            const progressText = document.getElementById('progressText');
+            const progressDetails = document.getElementById('progressDetails');
+            if (total > 0) {
+                const percentage = Math.min(100, Math.max(0, (current / total) * 100));
+                progressFill.style.width = `${percentage}%`;
+                progressText.textContent = `${text}`;
+                progressDetails.textContent = details || `${current}/${total}`;
+            } else {
+                progressText.textContent = text;
+                progressDetails.textContent = details;
+            }
+        }
+
+        function updateStats(offsets = 0, converted = 0, rvaUpdated = 0) {
+            // Smooth animation for stat updates
+            const animateValue = (element, newValue) => {
+                const current = parseInt(element.textContent);
+                if (current === newValue) return;
+                
+                let start = current;
+                const duration = 500;
+                const startTime = performance.now();
+                
+                const animate = (currentTime) => {
+                    const elapsed = currentTime - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    
+                    // Ease out function
+                    const easeOut = 1 - Math.pow(1 - progress, 3);
+                    const value = Math.floor(start + (newValue - start) * easeOut);
+                    
+                    element.textContent = value;
+                    
+                    if (progress < 1) {
+                        requestAnimationFrame(animate);
+                    } else {
+                        element.textContent = newValue;
+                    }
+                };
+                
+                requestAnimationFrame(animate);
+            };
+            
+            animateValue(document.getElementById('statOffsets'), offsets);
+            animateValue(document.getElementById('statConverted'), converted);
+            animateValue(document.getElementById('statUpdated'), rvaUpdated);
+            
+            const elapsed = Math.round((Date.now() - processingStartTime) / 1000);
+            document.getElementById('statTime').textContent = `${elapsed}s`;
+        }
+
+        function updateStep(stepNumber, status = 'active') {
+            const steps = document.querySelectorAll('.step');
+            steps.forEach((step, index) => {
+                step.classList.remove('active', 'completed');
+                if (index + 1 < stepNumber) {
+                    step.classList.add('completed');
+                } else if (index + 1 === stepNumber) {
+                    step.classList.add(status);
+                }
+            });
+        }
+
+        function updateCurrentProcessing(line) {
+            const currentProcessing = document.getElementById('currentProcessing');
+            const currentLine = document.getElementById('currentLine');
+            
+            if (line) {
+                currentProcessing.classList.remove('hidden');
+                // Apply blur if enabled
+                currentLine.innerHTML = blurEnabled ? blurOffsets(line) : line;
+            } else {
+                currentProcessing.classList.add('hidden');
+            }
+        }
+
+        // Toggle blur for processing status
+        function toggleBlur() {
+            blurEnabled = !blurEnabled;
+            const blurToggle = document.getElementById('blurToggle');
+            
+            if (blurEnabled) {
+                blurToggle.textContent = '👁️ Show Offsets';
+                blurToggle.classList.add('active');
+                log('🔒 Offset blurring enabled - sensitive data hidden', 'info');
+            } else {
+                blurToggle.textContent = '👁️ Hide Offsets';
+                blurToggle.classList.remove('active');
+                log('🔓 Offset blurring disabled - sensitive data visible', 'info');
+            }
+            
+            // Re-render all log entries with current blur state
+            const logContainer = document.getElementById('logContainer');
+            const logEntries = Array.from(logContainer.querySelectorAll('div'));
+            
+            // Clear and re-add all logs
+            logContainer.innerHTML = '';
+            logEntries.forEach(entry => {
+                const originalHTML = entry.innerHTML;
+                const colorClass = Array.from(entry.classList).find(cls => cls.startsWith('log-')) || '';
+                
+                const newEntry = document.createElement('div');
+                newEntry.className = 'log-entry';
+                if (colorClass) newEntry.classList.add(colorClass);
+                
+                let processedHTML = originalHTML;
+                if (blurEnabled) {
+                    processedHTML = blurOffsets(originalHTML);
+                } else {
+                    // Remove blur spans when showing offsets
+                    processedHTML = originalHTML.replace(/<span class="offset-blur">(.*?)<\/span>/g, '$1');
+                }
+                
+                newEntry.innerHTML = processedHTML;
+                logContainer.appendChild(newEntry);
+            });
+            
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        // Toggle blur for results section
+        function toggleResultsBlur() {
+            resultsBlurEnabled = !resultsBlurEnabled;
+            const resultsBlurToggle = document.getElementById('resultsBlurToggle');
+            
+            if (resultsBlurEnabled) {
+                resultsBlurToggle.textContent = '👁️ Show Offsets';
+                resultsBlurToggle.classList.add('active');
+            } else {
+                resultsBlurToggle.textContent = '👁️ Hide Offsets';
+                resultsBlurToggle.classList.remove('active');
+            }
+            
+            // Re-render conversion list with current blur state
+            const conversionList = document.getElementById('conversionList');
+            const conversionItems = Array.from(conversionList.querySelectorAll('.conversion-item'));
+            
+            conversionItems.forEach(item => {
+                const originalHTML = item.innerHTML;
+                
+                let processedHTML = originalHTML;
+                if (resultsBlurEnabled) {
+                    processedHTML = blurOffsets(originalHTML);
+                } else {
+                    // Remove blur spans when showing offsets
+                    processedHTML = originalHTML.replace(/<span class="offset-blur">(.*?)<\/span>/g, '$1');
+                }
+                
+                item.innerHTML = processedHTML;
+            });
+        }
+
+        // Conversion functions
+        function toHex(value) {
+            if (value.startsWith("0x")) {
+                return "0x" + value.substring(2).toUpperCase();
+            }
+            if (/^\d+$/.test(value)) {
+                return "0x" + parseInt(value).toString(16).toUpperCase();
+            }
+            return value;
+        }
+        
+        function toDec(value) {
+            if (value.startsWith("0x")) {
+                return parseInt(value, 16).toString();
+            }
+            if (/^\d+$/.test(value)) {
+                return value;
+            }
+            return value;
+        }
+
+        // File reading function
+        function readFileAsText(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = e => resolve(e.target.result);
+                reader.onerror = e => reject(new Error('Failed to read file'));
+                reader.readAsText(file);
+            });
+        }
+
+        // Extract function names from dump content - OPTIMIZED VERSION
+        function extractFunctionNames(dumpContent) {
+            const functionMap = {};
+            const lines = dumpContent.split('\n');
+            
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+                
+                // Look for RVA patterns with function names - optimized regex
+                const rvaMatch = line.match(/\/\/\s*(?:RVA|Offset|VA):\s*(0x[0-9A-Fa-f]+)/i);
+                if (rvaMatch) {
+                    const rva = rvaMatch[1].toUpperCase();
+                    
+                    // Look for function name in the same line - optimized approach
+                    let functionName = null;
+                    
+                    // Try to find function signature patterns in current line
+                    const functionMatch = line.match(/([A-Za-z_][A-Za-z0-9_]*)\s*\([^)]*\)/);
+                    if (functionMatch) {
+                        const candidate = functionMatch[1];
+                        // Filter out invalid names more efficiently
+                        const invalidNames = new Set(['if', 'for', 'while', 'switch', 'return', 'new', 'delete', 'public', 'private', 'protected', 'internal']);
+                        if (!invalidNames.has(candidate.toLowerCase()) && candidate.length > 2) {
+                            functionName = candidate;
+                        }
+                    }
+                    
+                    // If no function found in current line, check previous line quickly
+                    if (!functionName && i > 0) {
+                        const prevLine = lines[i - 1];
+                        const prevFunctionMatch = prevLine.match(/([A-Za-z_][A-Za-z0-9_]*)\s*\([^)]*\)/);
+                        if (prevFunctionMatch) {
+                            const candidate = prevFunctionMatch[1];
+                            const invalidNames = new Set(['if', 'for', 'while', 'switch', 'return', 'new', 'delete', 'public', 'private', 'protected', 'internal']);
+                            if (!invalidNames.has(candidate.toLowerCase()) && candidate.length > 2) {
+                                functionName = candidate;
+                            }
+                        }
+                    }
+                    
+                    if (functionName) {
+                        functionMap[rva] = functionName;
+                    }
+                }
+                
+                // Also look for explicit function declarations with RVA comments
+                const explicitFunctionMatch = line.match(/([A-Za-z_][A-Za-z0-9_]*)\s*\([^)]*\)\s*\/\/\s*(?:RVA|Offset|VA):\s*(0x[0-9A-Fa-f]+)/i);
+                if (explicitFunctionMatch) {
+                    const functionName = explicitFunctionMatch[1];
+                    const rva = explicitFunctionMatch[2].toUpperCase();
+                    functionMap[rva] = functionName;
+                }
+            }
+            
+            console.log(`Extracted ${Object.keys(functionMap).length} function names from dump`);
+            return functionMap;
+        }
+
+        // Base offset extraction - OPTIMIZED
+        function extractBaseOffsets(content) {
+            const baseOffsets = [];
+            const lines = content.split('\n');
+            
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+                // Faster check for HexPatches lines
+                if (line.includes('HexPatches.MemoryPatch') && line.includes('libunity.so')) {
+                    const parts = line.split(',');
+                    if (parts.length >= 2) {
+                        const offsetExpr = parts[1].trim();
+                        // Optimized regex for base offset extraction
+                        const baseMatch = offsetExpr.match(/^([0-9A-Fa-fx]+)/);
+                        if (baseMatch) {
+                            const baseOffset = baseMatch[1];
+                            baseOffsets.push({
+                                offset: baseOffset,
+                                lineNum: i + 1,
+                                originalLine: line
+                            });
+                        }
+                    }
+                }
+            }
+            
+            return baseOffsets;
+        }
+
+        // SMOOTH base offset conversion - with visual feedback
+        async function convertBaseOffsets(content, convertFunc) {
+            const convertMap = {};
+            const baseOffsets = extractBaseOffsets(content);
+            const total = baseOffsets.length;
+            
+            if (total === 0) {
+                log('No base offsets found in HexPatches to convert', 'warn');
+                return { content, convertMap };
+            }
+            
+            log(`Found ${total} base offsets to convert`, 'info');
+            updateStats(total, 0, 0);
+            
+            let newContent = content;
+            
+            // SMOOTH PROCESSING - with visual feedback
+            for (let i = 0; i < baseOffsets.length; i++) {
+                const item = baseOffsets[i];
+                const convertedOffset = convertFunc(item.offset);
+                convertMap[convertedOffset] = {
+                    original: item.offset,
+                    converted: convertedOffset,
+                    lineNum: item.lineNum,
+                    hasRvaUpdate: false
+                };
+                
+                // Show current processing with smooth animation
+                updateCurrentProcessing(`Line ${item.lineNum}: ${item.offset} → ${convertedOffset}`);
+                
+                // Replace only the base offset (whole word match)
+                const pattern = new RegExp('\\b' + item.offset + '\\b', 'g');
+                newContent = newContent.replace(pattern, convertedOffset);
+                
+                // Update progress and stats
+                updateProgress('Converting offsets', i + 1, total);
+                updateStats(total, i + 1, updatedRvaCount);
+                
+                // Log each conversion with smooth animation
+                log(`🧩 Converting: ${item.offset} → ${convertedOffset} (line ${item.lineNum})`, 'patch');
+                
+                // Small delay for smooth visualization (30-80ms per item)
+                await new Promise(resolve => setTimeout(resolve, 30 + Math.random() * 50));
+            }
+            
+            updateCurrentProcessing(null);
+            return { content: newContent, convertMap };
+        }
+
+        // Dump parsing - OPTIMIZED
+        function parseDumpContent(content) {
+            const result = {};
+            const pattern = /\s*(\w+\s+\w+\s*.*?)(RVA:\s*(0x[0-9A-Fa-fx]+))/g;
+            let match;
+            let matchCount = 0;
+            
+            while ((match = pattern.exec(content)) !== null) {
+                const desc = match[1].trim();
+                const rva = match[3].trim();
+                result[rva.toUpperCase()] = desc;
+                matchCount++;
+            }
+            
+            log(`Parsed ${matchCount} RVA entries from dump file`, 'info');
+            return result;
+        }
+
+        // Get appropriate function name for an offset - OPTIMIZED
+        function getFunctionNameForOffset(offset, originalBase, baseOffsetConverted, newRva) {
+            // First try to get function name from the new RVA
+            if (newRva && functionNames[newRva]) {
+                return functionNames[newRva];
+            }
+            
+            // Try to get function name from the converted offset
+            if (functionNames[baseOffsetConverted]) {
+                return functionNames[baseOffsetConverted];
+            }
+            
+            // Try to get function name from the original base
+            if (functionNames[originalBase]) {
+                return functionNames[originalBase];
+            }
+            
+            // If no specific function name found, use the offset as identifier
+            return `Offset_${offset.replace('0x', '')}`;
+        }
+
+        // SMOOTH dump comparison - with visual feedback
+        async function compareDumps(oldDumpContent, newDumpContent, rvList) {
+            log('🔍 Comparing dump files...', 'info');
+            
+            const oldDict = parseDumpContent(oldDumpContent);
+            const newDict = parseDumpContent(newDumpContent);
+            const result = {};
+            
+            // Extract function names from both dumps
+            const oldFunctionNames = extractFunctionNames(oldDumpContent);
+            const newFunctionNames = extractFunctionNames(newDumpContent);
+            
+            // Merge function names (prefer new ones)
+            functionNames = { ...oldFunctionNames, ...newFunctionNames };
+            
+            // Create reverse mapping for faster lookup
+            const newReverseMap = {};
+            Object.entries(newDict).forEach(([rva, sig]) => {
+                newReverseMap[sig] = rva;
+            });
+            
+            // SMOOTH PROCESSING - with visual feedback
+            for (let i = 0; i < rvList.length; i++) {
+                const rva = rvList[i];
+                
+                if (oldDict[rva]) {
+                    const sig = oldDict[rva];
+                    const newRva = newReverseMap[sig] || null;
+                    
+                    result[rva] = newRva;
+                    
+                    // Store the mapping for later use
+                    if (newRva) {
+                        rvaMappings[rva] = newRva;
+                        
+                        // Update progress with smooth animation
+                        updateCurrentProcessing(`Mapping: ${rva} → ${newRva}`);
+                        log(`🔍 Found Offset: ${rva} → ${newRva}`, 'info');
+                    }
+                } else {
+                    result[rva] = null;
+                }
+                
+                // Update progress with smooth animation
+                updateProgress('Comparing dumps', i + 1, rvList.length);
+                
+                // Small delay for smooth visualization
+                await new Promise(resolve => setTimeout(resolve, 20));
+            }
+            
+            updateCurrentProcessing(null);
+            return result;
+        }
+
+        // SMOOTH offset updating - with visual feedback
+        async function updateOffsets(content, mappings, convertMap) {
+            const lines = content.split('\n');
+            const updatedLines = [];
+            const total = lines.length;
+            updatedRvaCount = 0; // Reset counter
+            
+            // SMOOTH PROCESSING - with visual feedback
+            for (let i = 0; i < lines.length; i++) {
+                let line = lines[i];
+                
+                if (line.includes('HexPatches.MemoryPatch') && line.includes('libunity.so')) {
+                    let lineHasConversion = false;
+                    let baseOffsetConverted = null;
+                    let originalBase = null;
+                    
+                    // Check for converted offsets in this line
+                    for (const [converted, data] of Object.entries(convertMap)) {
+                        if (line.includes(converted)) {
+                            lineHasConversion = true;
+                            baseOffsetConverted = converted;
+                            originalBase = data.original;
+                            break;
+                        }
+                    }
+                    
+                    if (lineHasConversion && baseOffsetConverted) {
+                        const newRva = mappings[baseOffsetConverted.toUpperCase()];
+                        
+                        if (newRva) {
+                            line = line.replace(baseOffsetConverted, newRva.toUpperCase());
+                            
+                            // Get appropriate function name for this offset
+                            const functionName = getFunctionNameForOffset(
+                                baseOffsetConverted, 
+                                originalBase, 
+                                baseOffsetConverted, 
+                                newRva
+                            );
+                            
+                            // UPDATED: Use proper function name instead of generic one
+                            const comment = ` -- // RVA: ${newRva.toUpperCase()} - ${functionName} (converted from ${originalBase})`;
+                            line = line + comment;
+                            
+                            // MARK THIS OFFSET AS HAVING OFFSET UPDATE
+                            convertMap[baseOffsetConverted].hasRvaUpdate = true;
+                            convertMap[baseOffsetConverted].finalRva = newRva.toUpperCase();
+                            convertMap[baseOffsetConverted].functionName = functionName;
+                            updatedRvaCount++;
+                            
+                            // Log updates with smooth animation
+                            updateCurrentProcessing(`Updating line ${i+1}: ${originalBase} → ${newRva}`);
+                            log(`🧩 OFFSET UPDATE: ${originalBase} → ${baseOffsetConverted} → ${newRva.toUpperCase()} (${functionName})`, 'patch');
+                        } else {
+                            // Get appropriate function name for this offset
+                            const functionName = getFunctionNameForOffset(
+                                baseOffsetConverted, 
+                                originalBase, 
+                                baseOffsetConverted, 
+                                null
+                            );
+                            
+                            // UPDATED: Use proper function name instead of generic one
+                            const comment = ` -- // ${functionName} (converted from ${originalBase})`;
+                            line = line + comment;
+                            
+                            // Log conversions with smooth animation
+                            log(`🧩 Converted: ${originalBase} → ${baseOffsetConverted} (${functionName})`, 'patch');
+                        }
+                    }
+                }
+                
+                updatedLines.push(line);
+                
+                // Update progress with smooth animation
+                if (i % 10 === 0 || i === lines.length - 1) {
+                    updateProgress('Updating offsets', i + 1, total);
+                    updateStats(
+                        Object.keys(convertMap).length,
+                        Object.keys(convertMap).length,
+                        updatedRvaCount
+                    );
+                }
+                
+                // Small delay for smooth visualization
+                if (i % 5 === 0) {
+                    await new Promise(resolve => setTimeout(resolve, 10));
+                }
+            }
+            
+            updateCurrentProcessing(null);
+            
+            if (updatedRvaCount > 0) {
+                log(`✅ Successfully updated ${updatedRvaCount} Offsets from dump comparison`, 'ok');
+            } else {
+                log('ℹ️ No Offset found in dump comparison', 'info');
+            }
+            
+            return updatedLines.join('\n');
+        }
+
+        // SMOOTH auto processing after conversion - with visual feedback
+        async function autoProcessAfterConversion(content, convertMap, oldDumpContent, newDumpContent) {
+            log('\n' + '='.repeat(50), 'info');
+            log('🔄 AUTO PROCESSING AFTER CONVERSION', 'info');
+            log('='.repeat(50), 'info');
+            
+            // Show conversion summary
+            const conversionCount = Object.keys(convertMap).length;
+            log('📊 CONVERSION SUMMARY:', 'info');
+            log(`   • Base offsets converted: ${conversionCount}`, 'ok');
+            
+            if (conversionCount > 0) {
+                log('\n🔍 CONVERTED BASE OFFSETS:', 'info');
+                
+                // Show conversions with smooth animations
+                const conversions = Object.entries(convertMap).slice(0, 5);
+                for (const [converted, data] of conversions) {
+                    log(`   📍 ${data.original} → ${converted}`, 'warn');
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+                
+                if (conversionCount > 5) {
+                    log(`   ... and ${conversionCount - 5} more`, 'info');
+                }
+            }
+            
+            // Check if dump files are provided
+            if (oldDumpContent && newDumpContent) {
+                log('\n[Step 2] Comparing with new dump...', 'info');
+                
+                // Get all converted hex values for comparison
+                const convertedHexValues = Object.keys(convertMap).filter(conv => conv.startsWith('0x'));
+                
+                if (convertedHexValues.length > 0) {
+                    const mappings = await compareDumps(
+                        oldDumpContent, 
+                        newDumpContent, 
+                        convertedHexValues.map(x => x.toUpperCase())
+                    );
+                    
+                    // Count how many mappings we found
+                    const validMappings = Object.values(mappings).filter(v => v !== null).length;
+                    log(`Found ${validMappings} potential Offsets in dump comparison`, 'info');
+                    
+                    // Apply the mappings with smooth updates
+                    content = await updateOffsets(content, mappings, convertMap);
+                } else {
+                    log('No hex offsets to compare with dump files', 'warn');
+                }
+            } else {
+                log('Dump files not provided, skipping RVA comparison', 'warn');
+            }
+            
+            log('✅ Auto-processing completed!', 'ok');
+            return content;
+        }
+
+        // SMOOTH main processing function
+        async function processFiles() {
+            // Check maintenance status first
+            const maintenanceActive = await checkMaintenanceStatus();
+            if (!maintenanceActive) {
+                log('❌ Cannot process files during maintenance', 'err');
+                return;
+            }
+
+            processingStartTime = Date.now();
+            const fileInput = document.getElementById('fileInput');
+            const oldDumpFile = document.getElementById('oldDumpFile');
+            const newDumpFile = document.getElementById('newDumpFile');
+
+            if (!fileInput.files.length || !conversionMode) {
+                log('❌ Please select file and conversion mode', 'err');
+                return;
+            }
+
+            const file = fileInput.files[0];
+            fileName = file.name;
+
+            // Reset RVA tracking
+            rvaMappings = {};
+            updatedRvaCount = 0;
+            functionNames = {}; // Reset function names
+
+            log('🚀 Starting SMOOTH file processing...', 'info');
+            updateStep(2, 'active');
+
+            try {
+                updateProgress('Reading files', 0, 4);
+                const fileContent = await readFileAsText(file);
+                
+                // Read dump files if provided - parallel loading
+                const readPromises = [];
+                if (oldDumpFile.files.length > 0) {
+                    readPromises.push(readFileAsText(oldDumpFile.files[0]).then(content => {
+                        oldDumpContent = content;
+                        log(`📁 Loaded old dump file: ${oldDumpFile.files[0].name}`, 'ok');
+                    }));
+                }
+                
+                if (newDumpFile.files.length > 0) {
+                    readPromises.push(readFileAsText(newDumpFile.files[0]).then(content => {
+                        newDumpContent = content;
+                        log(`📁 Loaded new dump file: ${newDumpFile.files[0].name}`, 'ok');
+                    }));
+                }
+                
+                await Promise.all(readPromises);
+
+                updateProgress('Files loaded', 1, 4);
+                updateStep(2, 'completed');
+                updateStep(3, 'active');
+
+                // Determine conversion function
+                const convertFunc = conversionMode === 'decToHex' ? toHex : toDec;
+                log(`Converting base offsets using ${conversionMode === 'decToHex' ? 'Decimal → Hex' : 'Hex → Decimal'}`, 'ok');
+                
+                // Convert base offsets using SMOOTH logic
+                updateProgress('Converting base offsets', 0, 1);
+                const conversionResult = await convertBaseOffsets(fileContent, convertFunc);
+                convertedContent = conversionResult.content;
+                convertMap = conversionResult.convertMap;
+
+                updateProgress('Base offsets converted', 1, 1);
+                log(`✅ Converted ${Object.keys(convertMap).length} base offsets`, 'ok');
+
+                // Auto-process after conversion using SMOOTH logic
+                updateProgress('Auto-processing after conversion', 0, 1);
+                convertedContent = await autoProcessAfterConversion(
+                    convertedContent, 
+                    convertMap, 
+                    oldDumpContent, 
+                    newDumpContent
+                );
+
+                updateProgress('Auto-processing complete', 1, 1);
+                
+                updateStep(3, 'completed');
+                updateStep(4, 'active');
+
+                // Apply obfuscation
+                convertedContent = FastProtection.quickObfuscate(convertedContent);
+                
+                // Update final stats
+                updateStats(
+                    Object.keys(convertMap).length,
+                    Object.keys(convertMap).length,
+                    updatedRvaCount
+                );
+                
+                // Smooth transition to results
+                await new Promise(resolve => setTimeout(resolve, 500));
+                showResults(updatedRvaCount);
+                
+                updateStep(4, 'completed');
+                
+                const totalTime = Math.round((Date.now() - processingStartTime) / 1000);
+                updateProgress('Processing Complete', 1, 1, `✅ Done in ${totalTime}s`);
+
+            } catch (error) {
+                log(`❌ Processing Error: ${error.message}`, 'err');
+                updateProgress('Error occurred', 0, 1);
+                updateCurrentProcessing(null);
+            }
+        }
+
+        function showResults(rvaMappingsCount = 0) {
+            const resultsSection = document.getElementById('resultsSection');
+            const processingTime = Math.round((Date.now() - processingStartTime) / 1000);
+            const convertedCount = Object.keys(convertMap).length;
+
+            document.getElementById('resultFile').textContent = `File: ${fileName}`;
+            document.getElementById('resultOffsets').textContent = `Base offsets converted: ${convertedCount}`;
+            document.getElementById('resultMappings').textContent = `Offset updated: ${rvaMappingsCount}`;
+            document.getElementById('resultTime').textContent = `Processing time: ${processingTime}s`;
+
+            const conversionList = document.getElementById('conversionList');
+            conversionList.innerHTML = '';
+            
+            // Show conversions with smooth animations
+            const conversions = Object.entries(convertMap).slice(0, 10);
+            
+            conversions.forEach(([converted, data], index) => {
+                setTimeout(() => {
+                    const item = document.createElement('div');
+                    item.className = 'conversion-item';
+                    
+                    let displayText = `${data.original} → ${converted}`;
+                    
+                    // ADD OFFSET UPDATE VISUALLY IF IT EXISTS
+                    if (data.hasRvaUpdate && data.finalRva) {
+                        displayText += `<span class="rva-update"> → ${data.finalRva}</span>`;
+                    }
+                    
+                    // Add function name if available
+                    if (data.functionName) {
+                        displayText += ` (${data.functionName})`;
+                    }
+                    
+                    // Apply blur to offsets if enabled
+                    if (resultsBlurEnabled) {
+                        displayText = blurOffsets(displayText);
+                    }
+                    
+                    item.innerHTML = `<span class="conversion-icon">🔄</span> ${displayText}`;
+                    conversionList.appendChild(item);
+                    
+                    // Animate in
+                    setTimeout(() => {
+                        item.classList.add('visible');
+                    }, 10);
+                }, index * 100);
+            });
+
+            if (convertedCount > 10) {
+                setTimeout(() => {
+                    const moreItem = document.createElement('div');
+                    moreItem.className = 'conversion-item log-info visible';
+                    moreItem.textContent = `... and ${convertedCount - 10} more conversions`;
+                    conversionList.appendChild(moreItem);
+                }, conversions.length * 100);
+            }
+
+            // Smooth reveal of results section
+            resultsSection.classList.remove('hidden');
+            resultsSection.style.opacity = '0';
+            resultsSection.style.transform = 'translateY(20px)';
+            
+            setTimeout(() => {
+                resultsSection.style.transition = 'all 0.5s ease';
+                resultsSection.style.opacity = '1';
+                resultsSection.style.transform = 'translateY(0)';
+            }, 100);
+            
+            if (rvaMappingsCount > 0) {
+                log(`🎉 Successfully processed ${convertedCount} base offsets and updated ${rvaMappingsCount} Offsets!`, 'ok');
+                log(`📊 Offset show the final memory addresses after dump comparison`, 'info');
+            } else {
+                log(`🎉 Successfully processed ${convertedCount} base offsets!`, 'ok');
+                if (oldDumpContent && newDumpContent) {
+                    log(`💡 No Offset found - the offsets might already be correct or dump files don't match`, 'info');
+                }
+            }
+        }
+
+        function downloadResult() {
+            if (!convertedContent) return;
+
+            const blob = new Blob([convertedContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+
+            const fileExt = fileName.includes('.') ? 
+                fileName.substring(fileName.lastIndexOf('.')) : '.txt';
+            const newFileName = fileName.replace(fileExt, ` (Updated)${fileExt}`);
+
+            a.href = url;
+            a.download = newFileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            log('📥 File downloaded successfully', 'ok');
+        }
+
+        function resetApp() {
+            document.getElementById('resultsSection').classList.add('hidden');
+            document.getElementById('logContainer').innerHTML = 
+                '<div class="log-info">Ready to process files...</div>';
+            document.getElementById('progressFill').style.width = '0%';
+            document.getElementById('progressText').textContent = 'Ready';
+            document.getElementById('progressDetails').textContent = '';
+            document.getElementById('currentProcessing').classList.add('hidden');
+
+            updateStats(0, 0, 0);
+            updateStep(1);
+
+            document.getElementById('fileInput').value = '';
+            document.getElementById('oldDumpFile').value = '';
+            document.getElementById('newDumpFile').value = '';
+            document.getElementById('fileInfo').textContent = 'No file selected';
+            document.getElementById('oldDumpInfo').textContent = 'No file selected';
+            document.getElementById('newDumpInfo').textContent = 'No file selected';
+            document.getElementById('fileInfo').className = 'file-info';
+            document.getElementById('oldDumpInfo').className = 'file-info';
+            document.getElementById('newDumpInfo').className = 'file-info';
+            document.getElementById('processBtn').disabled = true;
+
+            convertedContent = null;
+            fileName = '';
+            convertMap = {};
+            oldDumpContent = null;
+            newDumpContent = null;
+            rvaMappings = {};
+            updatedRvaCount = 0;
+            functionNames = {};
+
+            log('🔄 Application reset - Ready for new processing', 'info');
+        }
+
+        // Initialize the app when the page loads
+        window.addEventListener('load', initializeApp);
+    </script>
+</body>
+</html>
